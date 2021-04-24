@@ -1,0 +1,29 @@
+plugins {
+	id 'java'
+	id 'maven-publish'
+}
+
+group 'me.jishuna.jishunacommonlib'
+version '1.0.0'
+
+repositories {
+	mavenLocal()
+}
+
+dependencies {
+    compileOnly 'org.spigotmc:spigot:1.16.5-R0.1-SNAPSHOT'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+compileJava {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+}
+
