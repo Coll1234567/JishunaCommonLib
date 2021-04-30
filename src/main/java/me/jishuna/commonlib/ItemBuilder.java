@@ -1,7 +1,11 @@
 package me.jishuna.commonlib;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Base64.Encoder;
 import java.util.List;
+import java.util.UUID;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -9,12 +13,18 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
+
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 
 public class ItemBuilder {
 
 	private ItemStack item;
 	private ItemMeta meta;
+	private static Field profileField;
+	private static final Encoder encoder = Base64.getEncoder();
 
 	private ItemBuilder() {
 	}
@@ -90,6 +100,42 @@ public class ItemBuilder {
 		return this;
 	}
 
+	public ItemBuilder withSkullTexture(String texture) {
+		if (!(this.meta instanceof SkullMeta))
+			return this;
+
+		GameProfile profile = new GameProfile(UUID.nameUUIDFromBytes(texture.getBytes()), "");
+		profile.getProperties().put("textures", new Property("textures", texture));
+
+		try {
+			getProfileField().set(meta, profile);
+		} catch (ReflectiveOperationException ex) {
+			ex.printStackTrace();
+		}
+		return this;
+	}
+
+	public ItemBuilder withSkullTextureUrl(String url) {
+		if (!(this.meta instanceof SkullMeta))
+			return this;
+
+		GameProfile profile = new GameProfile(UUID.nameUUIDFromBytes(url.getBytes()), "");
+
+		String fullUrl = new StringBuilder()
+				.append("{\"textures\":{\"SKIN\":{\"url\":\"http://textures.minecraft.net/texture/").append(url)
+				.append("\"}}}").toString();
+		String texture = encoder.encodeToString(fullUrl.getBytes());
+
+		profile.getProperties().put("textures", new Property("textures", texture));
+
+		try {
+			getProfileField().set(meta, profile);
+		} catch (ReflectiveOperationException ex) {
+			ex.printStackTrace();
+		}
+		return this;
+	}
+
 	public ItemStack build() {
 		ItemStack finalItem = this.item;
 		finalItem.setItemMeta(this.meta);
@@ -99,6 +145,18 @@ public class ItemBuilder {
 
 	private List<String> getLore() {
 		return meta.hasLore() ? meta.getLore() : new ArrayList<>();
+	}
+
+	private Field getProfileField() {
+		if (profileField == null) {
+			try {
+				profileField = meta.getClass().getDeclaredField("profile");
+				profileField.setAccessible(true);
+			} catch (ReflectiveOperationException ex) {
+				ex.printStackTrace();
+			}
+		}
+		return profileField;
 	}
 
 }
