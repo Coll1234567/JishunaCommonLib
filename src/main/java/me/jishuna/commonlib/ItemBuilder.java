@@ -7,12 +7,14 @@ import java.util.Base64.Encoder;
 import java.util.List;
 import java.util.UUID;
 
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -133,6 +135,14 @@ public class ItemBuilder {
 		} catch (ReflectiveOperationException ex) {
 			ex.printStackTrace();
 		}
+		return this;
+	}
+
+	public ItemBuilder withPotionColor(int red, int green, int blue) {
+		if (!(this.meta instanceof PotionMeta))
+			return this;
+
+		((PotionMeta) this.meta).setColor(Color.fromRGB(red, green, blue));
 		return this;
 	}
 
