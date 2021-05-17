@@ -36,6 +36,10 @@ public class CustomInventory {
 		this.inventory.setItem(slot, item);
 	}
 
+	public void removeButton(int slot) {
+		this.buttons.remove(slot);
+	}
+
 	public void addClickConsumer(Consumer<InventoryClickEvent> action) {
 		this.clickActions.add(action);
 	}
