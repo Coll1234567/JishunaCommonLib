@@ -16,24 +16,30 @@ import com.google.common.io.ByteStreams;
 public class FileUtils {
 
 	/**
-	 * Copies a file from a plugin jar into the plugins data folder. 
-	 * Preserves yml comments
+	 * Copies a file from a plugin jar into the plugins data folder. Preserves yml
+	 * comments
 	 * 
-	 * @param source The source plugin
+	 * @param source       The source plugin
 	 * @param resourceName The name of the desired file, including extension.
-	 * @return an optional containing the file, or an empty optional if an error occurs.
+	 * @return an optional containing the file, or an empty optional if an error
+	 *         occurs.
 	 */
 
 	@Nonnull
 	public static Optional<File> copyResource(Plugin source, String resourceName) {
-		File folder = source.getDataFolder();
-		File resourceFile = new File(folder, resourceName);
+		File resourceFile = new File(source.getDataFolder(), resourceName);
+
+		File parent = new File(resourceFile.getParent());
+		if (!parent.exists()) {
+			parent.mkdirs();
+		}
 		if (!resourceFile.exists()) {
 			try {
 				resourceFile.createNewFile();
 				try (InputStream in = source.getResource(resourceName);
 						OutputStream out = new FileOutputStream(resourceFile)) {
-					ByteStreams.copy(in, out);
+					if (in != null)
+						ByteStreams.copy(in, out);
 				}
 
 			} catch (IOException ex) {
