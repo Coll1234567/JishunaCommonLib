@@ -1,4 +1,4 @@
-package me.jishuna.commonlib;
+package me.jishuna.commonlib.persistantdata;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

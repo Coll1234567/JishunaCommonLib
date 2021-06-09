@@ -1,4 +1,4 @@
-package me.jishuna.commonlib;
+package me.jishuna.commonlib.random;
 
 import java.util.NavigableMap;
 import java.util.Random;

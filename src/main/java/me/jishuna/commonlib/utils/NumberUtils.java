@@ -1,4 +1,4 @@
-package me.jishuna.commonlib;
+package me.jishuna.commonlib.utils;
 
 import java.util.regex.Pattern;
 

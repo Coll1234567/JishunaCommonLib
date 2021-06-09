@@ -1,4 +1,4 @@
-package me.jishuna.commonlib;
+package me.jishuna.commonlib.items;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;

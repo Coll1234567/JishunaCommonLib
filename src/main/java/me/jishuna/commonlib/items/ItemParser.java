@@ -1,4 +1,4 @@
-package me.jishuna.commonlib;
+package me.jishuna.commonlib.items;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;

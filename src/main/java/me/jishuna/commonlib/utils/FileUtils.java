@@ -1,4 +1,4 @@
-package me.jishuna.commonlib;
+package me.jishuna.commonlib.utils;
 
 import java.io.File;
 import java.util.Optional;
@@ -12,7 +12,11 @@ public class FileUtils {
 
 	@Nonnull
 	public static Optional<YamlConfiguration> loadResource(Plugin source, String resourceName) {
-		source.saveResource(resourceName, false);
+		try {
+			source.saveResource(resourceName, false);
+		} catch (IllegalArgumentException ex) {
+			//TODO What should we do with this
+		}
 		File resourceFile = new File(source.getDataFolder(), resourceName);
 
 		if (!resourceFile.exists()) {
