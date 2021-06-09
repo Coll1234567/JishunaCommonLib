@@ -12,12 +12,14 @@ public class FileUtils {
 
 	@Nonnull
 	public static Optional<YamlConfiguration> loadResource(Plugin source, String resourceName) {
-		if (source.getResource(resourceName) != null) {
+		File resourceFile = new File(source.getDataFolder(), resourceName);
+
+		// Copy file if needed
+		if (!resourceFile.exists() && source.getResource(resourceName) != null) {
 			source.saveResource(resourceName, false);
 		}
 
-		File resourceFile = new File(source.getDataFolder(), resourceName);
-
+		// File still doesn't exist, return empty
 		if (!resourceFile.exists()) {
 			return Optional.empty();
 		}
