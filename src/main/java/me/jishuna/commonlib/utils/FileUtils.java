@@ -11,7 +11,7 @@ import org.bukkit.plugin.Plugin;
 public class FileUtils {
 
 	@Nonnull
-	public static Optional<YamlConfiguration> loadResource(Plugin source, String resourceName) {
+	public static Optional<File> loadResourceFile(Plugin source, String resourceName) {
 		File resourceFile = new File(source.getDataFolder(), resourceName);
 
 		// Copy file if needed
@@ -23,6 +23,17 @@ public class FileUtils {
 		if (!resourceFile.exists()) {
 			return Optional.empty();
 		}
-		return Optional.of(YamlConfiguration.loadConfiguration(resourceFile));
+		return Optional.of(resourceFile);
+	}
+
+	@Nonnull
+	public static Optional<YamlConfiguration> loadResource(Plugin source, String resourceName) {
+		Optional<File> optional = loadResourceFile(source, resourceName);
+
+		if (optional.isPresent()) {
+			return Optional.of(YamlConfiguration.loadConfiguration(optional.get()));
+		} else {
+			return Optional.empty();
+		}
 	}
 }

@@ -1,5 +1,6 @@
 package me.jishuna.commonlib.language;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,20 +15,24 @@ public class MessageConfig {
 	private Map<String, String> stringMap = new HashMap<>();
 	private Map<String, List<String>> stringListMap = new HashMap<>();
 
-	private final YamlConfiguration configuration;
+	private final File file;
+	private YamlConfiguration configuration;
 
-	public MessageConfig(YamlConfiguration configuration) {
-		this.configuration = configuration;
+	public MessageConfig(File file) {
+		this.file = file;
+		this.configuration = YamlConfiguration.loadConfiguration(file);
 	}
 
 	public void refresh() {
 		this.stringMap.clear();
 		this.stringListMap.clear();
+
+		this.configuration = YamlConfiguration.loadConfiguration(this.file);
 	}
 
 	public String getString(String key) {
 		return this.stringMap.computeIfAbsent(key,
-				mapKey -> ChatColor.translateAlternateColorCodes('&', this.configuration.getString(key, "")));
+				mapKey -> ChatColor.translateAlternateColorCodes('&', this.configuration.getString(key, "Error - Missing key: " + key)));
 	}
 
 	public List<String> getStringList(String key) {
