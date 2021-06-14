@@ -18,6 +18,8 @@ public class ArgumentCommandHandler extends SimpleCommandHandler {
 	private final Map<String, CommandExecutor> subcommands = new HashMap<>();
 	private final MessageConfig messageConfig;
 
+	private CommandExecutor defaultExecutor;
+
 	public ArgumentCommandHandler(MessageConfig messageConfig) {
 		this.messageConfig = messageConfig;
 	}
@@ -25,13 +27,17 @@ public class ArgumentCommandHandler extends SimpleCommandHandler {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (args.length == 0) {
-			sendUsage(sender, args);
-			return true;
+			if (this.defaultExecutor != null) {
+				return this.defaultExecutor.onCommand(sender, command, alias, args);
+			} else {
+				sendUsage(sender, "none");
+				return true;
+			}
 		} else if (args.length > 0) {
 			CommandExecutor executor = this.subcommands.get(args[0]);
 
 			if (executor == null) {
-				sendUsage(sender, args);
+				sendUsage(sender, args[0]);
 				return true;
 			}
 
@@ -50,7 +56,7 @@ public class ArgumentCommandHandler extends SimpleCommandHandler {
 		} else if (args.length > 1) {
 			CommandExecutor executor = this.subcommands.get(args[0]);
 
-			if (executor != null && executor instanceof TabCompleter) {
+			if (executor instanceof TabCompleter) {
 				return ((TabCompleter) executor).onTabComplete(sender, command, alias,
 						Arrays.copyOfRange(args, 1, args.length + 1));
 			}
@@ -58,15 +64,19 @@ public class ArgumentCommandHandler extends SimpleCommandHandler {
 		return null;
 	}
 
-	private void sendUsage(CommandSender sender, String[] args) {
+	private void sendUsage(CommandSender sender, String arg) {
 		String msg = messageConfig.getString("command-usage");
-		msg = msg.replace("%arg%", "none");
+		msg = msg.replace("%arg%", arg);
 		msg = msg.replace("%args%", String.join(", ", this.subcommands.keySet()));
 
 		sender.sendMessage(msg);
 	}
 
-	public void addArgumenExecutor(String arg, CommandExecutor exeuctor) {
+	public void addArgumentExecutor(String arg, CommandExecutor exeuctor) {
 		this.subcommands.put(arg, exeuctor);
+	}
+
+	public void setDefault(CommandExecutor exeuctor) {
+		this.defaultExecutor = exeuctor;
 	}
 }

@@ -5,7 +5,7 @@ import java.util.Random;
 import java.util.TreeMap;
 
 public class WeightedRandom<T> {
-	private final NavigableMap<Double, T> map = new TreeMap<Double, T>();
+	private final NavigableMap<Double, T> map = new TreeMap<>();
 	private final Random random;
 	private double total = 0;
 
