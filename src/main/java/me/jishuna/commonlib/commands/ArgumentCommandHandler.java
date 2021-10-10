@@ -2,30 +2,37 @@ package me.jishuna.commonlib.commands;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.util.StringUtil;
 
 import me.jishuna.commonlib.language.MessageConfig;
 
 public class ArgumentCommandHandler extends SimpleCommandHandler {
-	private final Map<String, CommandExecutor> subcommands = new HashMap<>();
+	private final Map<String, SimpleCommandHandler> subcommands = new HashMap<>();
 	private final MessageConfig messageConfig;
 
 	private CommandExecutor defaultExecutor;
 
-	public ArgumentCommandHandler(MessageConfig messageConfig) {
+	public ArgumentCommandHandler(MessageConfig messageConfig, String permission) {
+		super(permission);
 		this.messageConfig = messageConfig;
 	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
+		if (!sender.hasPermission(getPermission())) {
+			sender.sendMessage(messageConfig.getString("no-permission"));
+			return true;
+		}
+
 		if (args.length == 0) {
 			if (this.defaultExecutor != null) {
 				return this.defaultExecutor.onCommand(sender, command, alias, args);
@@ -34,7 +41,7 @@ public class ArgumentCommandHandler extends SimpleCommandHandler {
 				return true;
 			}
 		} else if (args.length > 0) {
-			CommandExecutor executor = this.subcommands.get(args[0]);
+			SimpleCommandHandler executor = this.subcommands.get(args[0]);
 
 			if (executor == null) {
 				sendUsage(sender, args[0]);
@@ -50,18 +57,21 @@ public class ArgumentCommandHandler extends SimpleCommandHandler {
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 		if (args.length == 1) {
 			List<String> suggestions = new ArrayList<>();
+			List<String> validSubcommands = new ArrayList<>();
 
-			StringUtil.copyPartialMatches(args[0], subcommands.keySet(), suggestions);
+			for (Entry<String, SimpleCommandHandler> entry : this.subcommands.entrySet()) {
+				if (sender.hasPermission(entry.getValue().getPermission()))
+					validSubcommands.add(entry.getKey());
+			}
+
+			StringUtil.copyPartialMatches(args[0], validSubcommands, suggestions);
 			return suggestions;
 		} else if (args.length > 1) {
-			CommandExecutor executor = this.subcommands.get(args[0]);
+			SimpleCommandHandler executor = this.subcommands.get(args[0]);
 
-			if (executor instanceof TabCompleter) {
-				return ((TabCompleter) executor).onTabComplete(sender, command, alias,
-						Arrays.copyOfRange(args, 1, args.length + 1));
-			}
+			return executor.onTabComplete(sender, command, alias, Arrays.copyOfRange(args, 1, args.length + 1));
 		}
-		return null;
+		return Collections.emptyList();
 	}
 
 	private void sendUsage(CommandSender sender, String arg) {
@@ -72,11 +82,11 @@ public class ArgumentCommandHandler extends SimpleCommandHandler {
 		sender.sendMessage(msg);
 	}
 
-	public void addArgumentExecutor(String arg, CommandExecutor exeuctor) {
+	public void addArgumentExecutor(String arg, SimpleCommandHandler exeuctor) {
 		this.subcommands.put(arg, exeuctor);
 	}
 
-	public void setDefault(CommandExecutor exeuctor) {
+	public void setDefault(SimpleCommandHandler exeuctor) {
 		this.defaultExecutor = exeuctor;
 	}
 }

@@ -14,6 +14,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -99,6 +100,14 @@ public class ItemBuilder {
 	public ItemBuilder withModelData(int index) {
 		this.meta.setCustomModelData(index);
 
+		return this;
+	}
+	
+	public ItemBuilder withDyeColor(Color color) {
+		if (!(this.meta instanceof LeatherArmorMeta))
+			return this;
+		
+		((LeatherArmorMeta)this.meta).setColor(color);
 		return this;
 	}
 

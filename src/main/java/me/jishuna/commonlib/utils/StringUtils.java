@@ -9,11 +9,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Color;
 
 public class StringUtils {
 	private static Map<Integer, Pattern> regexCache = new HashMap<>();
 
-	private final static TreeMap<Integer, String> romanMap = new TreeMap<Integer, String>();
+	private static final TreeMap<Integer, String> romanMap = new TreeMap<>();
+	private static final Color WHITE = Color.fromRGB(255, 255, 255);
 
 	static {
 		romanMap.put(1000, "M");
@@ -35,7 +37,7 @@ public class StringUtils {
 		Pattern pattern = regexCache.computeIfAbsent(size,
 				key -> Pattern.compile("(?<![^\\s]).{1," + size + "}(?![^\\s])"));
 
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 		String prev = "";
 
 		Matcher matcher = pattern.matcher(string);
@@ -56,4 +58,19 @@ public class StringUtils {
 		return romanMap.get(l) + toRomanNumeral(number - l);
 	}
 
+	public static Color getColor(String string) {
+		String[] parts = string.trim().split(",");
+
+		if (parts.length < 3)
+			return WHITE;
+
+		for (int i = 0; i < parts.length; i++) {
+			String part = parts[i].trim();
+			if (!org.apache.commons.lang.StringUtils.isNumeric(part))
+				return WHITE;
+			parts[i] = part;
+		}
+
+		return Color.fromRGB(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
+	}
 }
