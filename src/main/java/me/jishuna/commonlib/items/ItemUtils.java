@@ -1,6 +1,7 @@
 package me.jishuna.commonlib.items;
 
 import org.bukkit.EntityEffect;
+import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -41,5 +42,10 @@ public class ItemUtils {
 			}
 			item.setItemMeta((ItemMeta) damagable);
 		}
+	}
+	
+	public static Material getMaterial(String mat, Material def) {
+		Material material = Material.getMaterial(mat.toUpperCase());
+		return material == null ? def : material;
 	}
 }
