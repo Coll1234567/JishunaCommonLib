@@ -68,8 +68,8 @@ public class ArgumentCommandHandler extends SimpleCommandHandler {
 			return suggestions;
 		} else if (args.length > 1) {
 			SimpleCommandHandler executor = this.subcommands.get(args[0]);
-
-			return executor.onTabComplete(sender, command, alias, Arrays.copyOfRange(args, 1, args.length + 1));
+			if (executor != null)
+				return executor.onTabComplete(sender, command, alias, Arrays.copyOfRange(args, 1, args.length + 1));
 		}
 		return Collections.emptyList();
 	}
