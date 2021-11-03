@@ -13,6 +13,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.PotionMeta;
@@ -52,6 +53,14 @@ public class ItemBuilder {
 	public ItemBuilder withEnchantment(Enchantment enchantment, int level) {
 		this.meta.addEnchant(enchantment, level, true);
 
+		return this;
+	}
+
+	public ItemBuilder withStoredEnchantment(Enchantment enchantment, int level) {
+		if (!(this.meta instanceof EnchantmentStorageMeta))
+			return this;
+
+		((EnchantmentStorageMeta) this.meta).addStoredEnchant(enchantment, level, true);
 		return this;
 	}
 
@@ -102,12 +111,12 @@ public class ItemBuilder {
 
 		return this;
 	}
-	
+
 	public ItemBuilder withDyeColor(Color color) {
 		if (!(this.meta instanceof LeatherArmorMeta))
 			return this;
-		
-		((LeatherArmorMeta)this.meta).setColor(color);
+
+		((LeatherArmorMeta) this.meta).setColor(color);
 		return this;
 	}
 
