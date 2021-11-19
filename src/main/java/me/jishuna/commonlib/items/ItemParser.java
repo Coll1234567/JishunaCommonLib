@@ -1,9 +1,15 @@
 package me.jishuna.commonlib.items;
 
+import java.util.EnumSet;
+
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 public class ItemParser {
+	private static final EnumSet<Material> LEATHER_ITEMS = EnumSet.of(Material.LEATHER_HELMET,
+			Material.LEATHER_CHESTPLATE, Material.LEATHER_LEGGINGS, Material.LEATHER_BOOTS,
+			Material.LEATHER_HORSE_ARMOR);
 
 	private static final Material PLAYER_HEAD = Material.PLAYER_HEAD;
 	private static final Material POTION = Material.POTION;
@@ -36,6 +42,13 @@ public class ItemParser {
 			builder.withPotionColor(red, green, blue);
 		}
 
+		if (LEATHER_ITEMS.contains(material) && data.length >= 4) {
+			int red = Integer.parseInt(data[1]);
+			int green = Integer.parseInt(data[2]);
+			int blue = Integer.parseInt(data[3]);
+
+			builder.withDyeColor(Color.fromRGB(red, green, blue));
+		}
 		return builder.build();
 	}
 
