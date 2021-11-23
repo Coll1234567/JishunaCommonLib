@@ -19,6 +19,9 @@ public class ItemParser {
 	}
 
 	public static ItemStack parseItem(String string, Material def) {
+		if (string == null)
+			return null;
+		
 		String[] data = string.split(",");
 		if (data.length == 0) {
 			return new ItemStack(def);

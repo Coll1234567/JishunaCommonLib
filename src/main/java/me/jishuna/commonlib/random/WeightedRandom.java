@@ -30,4 +30,12 @@ public class WeightedRandom<T> {
 		double value = random.nextDouble() * total;
 		return map.higherEntry(value).getValue();
 	}
+	
+	public boolean isEmpty() {
+		return this.map.isEmpty();
+	}
+	
+	public int getSize() {
+		return this.map.size();
+	}
 }
