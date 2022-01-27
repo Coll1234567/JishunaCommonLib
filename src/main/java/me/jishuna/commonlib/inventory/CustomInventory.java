@@ -74,4 +74,8 @@ public class CustomInventory {
 	public void setItem(int slot, ItemStack item) {
 		this.inventory.setItem(slot, item);
 	}
+	
+	public Inventory getBukkitInventory() {
+		return this.inventory;
+	}
 }

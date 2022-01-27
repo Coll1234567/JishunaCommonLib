@@ -9,7 +9,7 @@ import org.bukkit.util.StringUtil;
 
 import com.google.common.reflect.ClassPath;
 
-public class ClassUtils {
+public class ReflectionUtils {
 	public static Set<Class<?>> getAllClassesInPackage(String packageName, ClassLoader loader) {
 		try {
 			return ClassPath.from(loader).getAllClasses().stream()

@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -18,8 +19,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.google.common.io.ByteStreams;
-
-import io.netty.util.internal.shaded.org.jctools.queues.MessagePassingQueue.Consumer;
 
 public class FileUtils {
 
