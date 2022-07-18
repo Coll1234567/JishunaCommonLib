@@ -1,7 +1,10 @@
 package me.jishuna.commonlib.random;
 
+import java.util.Collection;
+import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.Random;
+import java.util.Set;
 import java.util.TreeMap;
 
 public class WeightedRandom<T> {
@@ -30,12 +33,24 @@ public class WeightedRandom<T> {
 		double value = random.nextDouble() * total;
 		return map.higherEntry(value).getValue();
 	}
-	
+
 	public boolean isEmpty() {
 		return this.map.isEmpty();
 	}
-	
+
 	public int getSize() {
 		return this.map.size();
+	}
+
+	public Collection<T> getValues() {
+		return this.map.values();
+	}
+
+	public Set<Entry<Double, T>> getEntries() {
+		return this.map.entrySet();
+	}
+	
+	public double getTotalWeight() {
+		return this.total;
 	}
 }

@@ -1,15 +1,18 @@
 package me.jishuna.commonlib.items;
 
-import java.lang.reflect.Field;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Base64.Encoder;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -19,16 +22,18 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionData;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.profile.PlayerProfile;
+import org.bukkit.profile.PlayerTextures;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
+import net.md_5.bungee.api.ChatColor;
 
 public class ItemBuilder {
+	private static final String TEXTURE_URL = "http://textures.minecraft.net/texture/";
 
 	private ItemStack item;
 	private ItemMeta meta;
-	private static Field profileField;
-	private static final Encoder encoder = Base64.getEncoder();
 
 	private ItemBuilder() {
 	}
@@ -50,13 +55,23 @@ public class ItemBuilder {
 		return builder;
 	}
 
-	public ItemBuilder withEnchantment(Enchantment enchantment, int level) {
-		this.meta.addEnchant(enchantment, level, true);
+	public ItemBuilder amount(int amount) {
+		this.item.setAmount(amount);
 
 		return this;
 	}
 
-	public ItemBuilder withStoredEnchantment(Enchantment enchantment, int level) {
+	public ItemBuilder modifier(Attribute attribute, AttributeModifier modifier) {
+		this.meta.addAttributeModifier(attribute, modifier);
+		return this;
+	}
+
+	public ItemBuilder enchantment(Enchantment enchantment, int level) {
+		this.meta.addEnchant(enchantment, level, true);
+		return this;
+	}
+
+	public ItemBuilder storedEnchantment(Enchantment enchantment, int level) {
 		if (!(this.meta instanceof EnchantmentStorageMeta))
 			return this;
 
@@ -64,14 +79,15 @@ public class ItemBuilder {
 		return this;
 	}
 
-	public ItemBuilder withName(String name) {
-		this.meta.setDisplayName(name);
+	public ItemBuilder name(String name) {
+		this.meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
 
 		return this;
 	}
 
-	public ItemBuilder addLore(List<String> lore) {
+	public ItemBuilder lore(List<String> lore) {
 		List<String> itemLore = getLore();
+		lore = lore.stream().map(line -> ChatColor.translateAlternateColorCodes('&', line)).toList();
 		itemLore.addAll(lore);
 
 		meta.setLore(itemLore);
@@ -79,40 +95,51 @@ public class ItemBuilder {
 		return this;
 	}
 
-	public ItemBuilder addLore(String... lore) {
+	public ItemBuilder lore(String... lore) {
 		List<String> itemLore = getLore();
-		for (String loreLine : lore)
-			itemLore.add(loreLine);
+		List<String> loreList = Arrays.stream(lore).map(line -> ChatColor.translateAlternateColorCodes('&', line))
+				.toList();
+		itemLore.addAll(loreList);
 
 		meta.setLore(itemLore);
 
 		return this;
 	}
 
-	public ItemBuilder withLore(List<String> lore) {
-		this.meta.setLore(lore);
-		return this;
-	}
-
-	public ItemBuilder withFlags(ItemFlag... flags) {
+	public ItemBuilder flags(ItemFlag... flags) {
 		this.meta.addItemFlags(flags);
 
 		return this;
 	}
 
-	public <T, Z> ItemBuilder withPersistantData(NamespacedKey key, PersistentDataType<T, Z> type, Z value) {
+	public ItemBuilder skullTexture(String texture) {
+		if (!(this.meta instanceof SkullMeta))
+			return this;
+
+		PlayerProfile profile = Bukkit.createPlayerProfile(UUID.nameUUIDFromBytes(texture.getBytes()));
+		PlayerTextures textures = profile.getTextures();
+		try {
+			textures.setSkin(new URL(TEXTURE_URL + texture));
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		profile.setTextures(textures);
+		((SkullMeta) this.meta).setOwnerProfile(profile);
+		return this;
+	}
+
+	public <T, Z> ItemBuilder persistentData(NamespacedKey key, PersistentDataType<T, Z> type, Z value) {
 		this.meta.getPersistentDataContainer().set(key, type, value);
-
 		return this;
 	}
 
-	public ItemBuilder withModelData(int index) {
+	public ItemBuilder modelData(int index) {
 		this.meta.setCustomModelData(index);
-
 		return this;
 	}
 
-	public ItemBuilder withDyeColor(Color color) {
+	public ItemBuilder dyeColor(Color color) {
 		if (!(this.meta instanceof LeatherArmorMeta))
 			return this;
 
@@ -120,47 +147,31 @@ public class ItemBuilder {
 		return this;
 	}
 
-	public ItemBuilder withSkullTexture(String texture) {
-		if (!(this.meta instanceof SkullMeta))
-			return this;
-
-		GameProfile profile = new GameProfile(UUID.nameUUIDFromBytes(texture.getBytes()), "");
-		profile.getProperties().put("textures", new Property("textures", texture));
-
-		try {
-			getProfileField().set(meta, profile);
-		} catch (ReflectiveOperationException ex) {
-			ex.printStackTrace();
-		}
-		return this;
+	public ItemBuilder dyeColor(int red, int green, int blue) {
+		return dyeColor(Color.fromRGB(red, green, blue));
 	}
 
-	public ItemBuilder withSkullTextureUrl(String url) {
-		if (!(this.meta instanceof SkullMeta))
-			return this;
-
-		GameProfile profile = new GameProfile(UUID.nameUUIDFromBytes(url.getBytes()), "");
-
-		String fullUrl = new StringBuilder()
-				.append("{\"textures\":{\"SKIN\":{\"url\":\"http://textures.minecraft.net/texture/").append(url)
-				.append("\"}}}").toString();
-		String texture = encoder.encodeToString(fullUrl.getBytes());
-
-		profile.getProperties().put("textures", new Property("textures", texture));
-
-		try {
-			getProfileField().set(meta, profile);
-		} catch (ReflectiveOperationException ex) {
-			ex.printStackTrace();
-		}
-		return this;
-	}
-
-	public ItemBuilder withPotionColor(int red, int green, int blue) {
+	public ItemBuilder potionColor(int red, int green, int blue) {
 		if (!(this.meta instanceof PotionMeta))
 			return this;
 
 		((PotionMeta) this.meta).setColor(Color.fromRGB(red, green, blue));
+		return this;
+	}
+
+	public ItemBuilder potionData(PotionData data) {
+		if (!(this.meta instanceof PotionMeta))
+			return this;
+
+		((PotionMeta) this.meta).setBasePotionData(data);
+		return this;
+	}
+
+	public ItemBuilder potionEffect(PotionEffect effect) {
+		if (!(this.meta instanceof PotionMeta))
+			return this;
+
+		((PotionMeta) this.meta).addCustomEffect(effect, true);
 		return this;
 	}
 
@@ -173,18 +184,6 @@ public class ItemBuilder {
 
 	private List<String> getLore() {
 		return meta.hasLore() ? meta.getLore() : new ArrayList<>();
-	}
-
-	private Field getProfileField() {
-		if (profileField == null) {
-			try {
-				profileField = meta.getClass().getDeclaredField("profile");
-				profileField.setAccessible(true);
-			} catch (ReflectiveOperationException ex) {
-				ex.printStackTrace();
-			}
-		}
-		return profileField;
 	}
 
 }
